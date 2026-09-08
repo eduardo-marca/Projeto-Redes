@@ -1,40 +1,33 @@
-import pygame
-from consts import *
-from game import Game
-from threading import Thread
+from multiprocessing import Process, freeze_support, set_start_method
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Chess")
-clock = pygame.time.Clock()
-icon = pygame.image.load('imgs/icon.png')
-pygame.display.set_icon(icon)
+from consts import PieceColor
+from player import Player
 
-game = Game(PieceColor.WHITE, screen)
+def run_player(piece_color: PieceColor, window_position: tuple[int, int]) -> None:
+    Player(piece_color, window_position).start()
 
-def main():
-    pygame.init()
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                game.handle_click(x, y)
-            elif event.type == pygame.MOUSEBUTTONUP:
-                x, y = event.pos
+def main() -> None:
+    processes = [
+        Process(
+            target=run_player,
+            args=(PieceColor.WHITE, (40, 40)),
+            name="white-player",
+        ),
+        Process(
+            target=run_player,
+            args=(PieceColor.BLACK, (880, 40)),
+            name="black-player",
+        ),
+    ]
 
-        screen.fill(BACKGROUND_COLOR)
+    for process in processes:
+        process.start()
 
-        game.render()
-
-        pygame.display.flip()
-
-        clock.tick(60)
-
-    pygame.quit()
+    for process in processes:
+        process.join()
 
 if __name__ == '__main__':
+    freeze_support()
+    set_start_method("spawn")
     main()
-    

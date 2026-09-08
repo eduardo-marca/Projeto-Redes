@@ -1,11 +1,13 @@
 import pygame
+from pathlib import Path
 from consts import *
 from board import Board
 
-class Renderer:
+class GameRenderer:
     def __init__(self, screen) -> None:
         self.screen = screen
-        self.original_image = pygame.image.load("imgs/pieces.png").convert_alpha()
+        asset_path = Path(__file__).resolve().parent / "imgs" / "pieces.png"
+        self.original_image = pygame.image.load(asset_path).convert_alpha()
         self.pieces_image = pygame.transform.smoothscale(self.original_image, (SQSIZE * 6, SQSIZE * 2))
         self.piece_width = self.pieces_image.get_width() // 6
         self.piece_height = self.pieces_image.get_height() // 2
