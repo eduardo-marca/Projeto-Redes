@@ -2,7 +2,6 @@ import pygame
 import sys
 
 from consts import *
-from game import Game
 from player import Player
 
 screen = pygame.display.set_mode((2*WIDTH+3*BORDER, HEIGHT+2*BORDER))
@@ -13,8 +12,6 @@ clock = pygame.time.Clock()
 
 player1_surface = pygame.Surface((WIDTH, HEIGHT))
 player2_surface = pygame.Surface((WIDTH, HEIGHT))
-
-game = Game(PieceColor.WHITE, screen)
 
 def main():
     pygame.init()
@@ -30,9 +27,12 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 if x >= BORDER and x <= BORDER + WIDTH and y >= BORDER and y <= BORDER + WIDTH:
-                    player1.game.handle_click(x-BORDER, y-BORDER)
+                    player1.handle_click(x-BORDER, y-BORDER)
                 elif x >= 2*BORDER + WIDTH and x <= 2*(BORDER+WIDTH) and y >= BORDER and y <= BORDER + WIDTH:
-                    player2.game.handle_click(x-2*BORDER-WIDTH, y-BORDER)
+                    player2.handle_click(x-2*BORDER-WIDTH, y-BORDER)
+
+        player1.start_tick()
+        player2.start_tick()
 
         player1.tick()
         player2.tick()

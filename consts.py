@@ -59,10 +59,3 @@ def getInfo(piece : Piece) -> tuple[PieceColor, PieceType]:
 def in_board(square : tuple[int, int]) -> bool:
     row, col = square
     return row >= 0 and col >= 0 and row <= 7 and col <= 7
-
-class Move:
-    def __init__(self, start : tuple[int, int], end : tuple[int, int], is_castling : bool = False, is_promotion : bool = False) -> None:
-        self.start = start
-        self.end = end
-        self.is_castling = is_castling
-        self.is_promotion = is_promotion

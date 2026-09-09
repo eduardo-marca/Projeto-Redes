@@ -1,4 +1,4 @@
-from extra.arquivosComunicador.Buffer import Buffer
+from buffer import Buffer
 
 # O comunicador serve para enviar e receber mensagens
 # entre duas entidades que utilizam o mesmo id

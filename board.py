@@ -1,4 +1,5 @@
 from consts import *
+from move import Move
 
 class Board:
     def __init__(self):
