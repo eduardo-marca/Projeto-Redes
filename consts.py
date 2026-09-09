@@ -3,6 +3,7 @@ from pygame import Color
 
 # Screen dimensions
 WIDTH = HEIGHT = 800
+BORDER = 20
 
 # Board dimensions
 COLS = 8
@@ -10,7 +11,7 @@ ROWS = 8
 SQSIZE = WIDTH // COLS
 
 # Colors
-BACKGROUND_COLOR = Color(255, 0, 255)
+BACKGROUND_COLOR = Color(64, 64, 64)
 LIGHT_SQUARE_COLOR = Color(235, 236, 208)
 DARK_SQUARE_COLOR = Color(119, 149, 86)
 HIGHLIGHT_LIGHT_SQUARE_COLOR = Color(255, 18, 70)

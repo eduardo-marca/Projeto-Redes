@@ -1,11 +1,11 @@
 from consts import *
-from renderer import Renderer
+from game_renderer import GameRenderer
 from board import Board
 from pygame import Surface
 
 class Game:
     def __init__(self, player_color : PieceColor, screen : Surface) -> None:
-        self.renderer = Renderer(screen)
+        self.renderer = GameRenderer(screen)
         self.board = Board()
         self.player_color = player_color
         self.selected_square = None

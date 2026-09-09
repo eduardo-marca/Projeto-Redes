@@ -2,7 +2,7 @@ import pygame
 from consts import *
 from board import Board
 
-class Renderer:
+class GameRenderer:
     def __init__(self, screen) -> None:
         self.screen = screen
         self.original_image = pygame.image.load("imgs/pieces.png").convert_alpha()
