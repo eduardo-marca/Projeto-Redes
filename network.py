@@ -1,8 +1,6 @@
 import socket
 
-
 PORT = 50000
-
 
 class NetworkConnection:
     def __init__(self, sock: socket.socket):

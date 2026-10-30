@@ -1,6 +1,3 @@
-import sys
-import socket
-
 from pygame import Surface
 from network import NetworkConnection
 

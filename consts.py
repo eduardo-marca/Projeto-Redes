@@ -3,7 +3,6 @@ from pygame import Color
 
 # Screen dimensions
 WIDTH = HEIGHT = 800
-BORDER = 20
 
 # Board dimensions
 COLS = 8
