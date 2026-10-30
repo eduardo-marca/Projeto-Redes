@@ -2,6 +2,7 @@ import sys
 import socket
 
 from pygame import Surface
+from network import NetworkConnection
 
 from consts import *
 from game_renderer import GameRenderer
@@ -9,32 +10,15 @@ from board import Board
 from move import Move
 
 class Player():
-    def __init__(self, pieceColor : PieceColor, screen : Surface) -> None:
+    def __init__(self, pieceColor : PieceColor, screen : Surface, connection : NetworkConnection) -> None:
         self.pieceColor = pieceColor
 
         self.renderer = GameRenderer(screen)
         self.board = Board()
-        self.pieceColor = pieceColor
         self.selected_square = None
         self.selected_piece = Piece.NONE
-
-        self.mec = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        endereco = ('127.0.0.1', 50000)
-        self.mec.connect(endereco)
         
-        self.mensagem = "e$"
-        
-    def formatarEnvio(texto : str):
-        mensagem_bytes = texto.encode()
-        tam = len(mensagem_bytes)
-        tam_bytes = tam.to_bytes(2,'big')
-        return tam_bytes + mensagem_bytes
-
-    def obterString(sock : socket):
-        dados = sock.recv(2)
-        tamanho = int.from_bytes(dados, 'big')
-        dados = sock.recv(tamanho)
-        return dados.decode()
+        self.connection = connection
 
     def get_clicked_square(self, x : int, y : int) -> tuple[int, int]:
         if self.pieceColor == PieceColor.WHITE:
@@ -43,46 +27,57 @@ class Player():
             return ((HEIGHT - y) // SQSIZE, (WIDTH - x) // SQSIZE)
 
     def handle_click(self, x : int, y : int) -> None:
+        if self.board.color_to_move != self.pieceColor:
+            return
+        
         clicked_square = self.get_clicked_square(x, y)
-        if(self.selected_square == None):
+        
+        if self.selected_square is None:
             self.selected_piece = self.board.pieces[clicked_square[0]][clicked_square[1]]
-            if(self.selected_piece != Piece.NONE and getColor(self.selected_piece) == self.pieceColor and getColor(self.selected_piece) == self.board.color_to_move):
-                moves : list[Move] = self.board.generate_piece_moves(clicked_square)
+
+            if (self.selected_piece != Piece.NONE and getColor(self.selected_piece) == self.pieceColor):
+                moves: list[Move] = (self.board.generate_piece_moves(clicked_square))
+
                 if not moves:
                     return
-                self.selected_square = clicked_square 
-                highlight_squares = []
-                for move in moves:
-                    highlight_squares.append(move.end)
-                self.renderer.set_hightlighted_squares(highlight_squares, self.selected_square)
+
+                self.selected_square = clicked_square
+
+                highlight_squares = [move.end for move in moves]
+
+                self.renderer.set_hightlighted_squares(highlight_squares, self.selected_square,)
+
         else:
             moves = self.board.generate_piece_moves(self.selected_square)
+
             for move in moves:
                 if clicked_square == move.end:
                     self.board.make_move(move)
-                    self.mensagem = "m$" + move.to_string()
+
+                    self.connection.send_message("m$" + move.to_string())
                     break
+
             self.selected_square = None
+
             self.renderer.set_hightlighted_squares([], None)
 
+    def tick(self) -> None:
+        for message in self.connection.receive_messages():
+            data = message.split("$")
+
+            if data[0] == "m":
+                start = (int(data[1]), int(data[2]))
+                end = (int(data[3]), int(data[4]))
+
+                is_castling = data[5] == "1"
+                is_promotion = data[6] == "1"
+
+                move = Move(start, end, is_castling, is_promotion)
+
+                self.board.make_move(move)
+
+                self.selected_square = None
+                self.renderer.set_hightlighted_squares([], None)
+        
     def render(self) -> None:
         self.renderer.render(self.board, self.pieceColor)
-
-    def start_tick(self) -> None:
-        dadosCodificados = self.formatarEnvio(self.mensagem)
-        self.mec.send(dadosCodificados)
-        self.mec.enviarMensagem(self.mensagem)
-        self.mensagem = "e$"
-
-    def tick(self) -> None:
-        mensagemRecebida = self.obterString(self.mec)
-        dados = mensagemRecebida.split('$')
-        if dados[0] != "e":
-            start = (int(dados[1]), int(dados[2]))
-            end = (int(dados[3]), int(dados[4]))
-            is_castling = True if dados[5] == "1" else False
-            is_promotion = True if dados[6] == "1" else False
-            move = Move(start, end, is_castling, is_promotion)
-            self.board.make_move(move)
-
-        self.render()
