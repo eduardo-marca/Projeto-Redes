@@ -1,11 +1,12 @@
-import pygame
+import sys
+import socket
+
 from pygame import Surface
 
 from consts import *
 from game_renderer import GameRenderer
 from board import Board
 from move import Move
-from comunicador import Comunicador
 
 class Player():
     def __init__(self, pieceColor : PieceColor, screen : Surface) -> None:
@@ -17,8 +18,23 @@ class Player():
         self.selected_square = None
         self.selected_piece = Piece.NONE
 
-        self.mec = Comunicador(1)
+        self.mec = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        endereco = ('127.0.0.1', 50000)
+        self.mec.connect(endereco)
+        
         self.mensagem = "e$"
+        
+    def formatarEnvio(texto : str):
+        mensagem_bytes = texto.encode()
+        tam = len(mensagem_bytes)
+        tam_bytes = tam.to_bytes(2,'big')
+        return tam_bytes + mensagem_bytes
+
+    def obterString(sock : socket):
+        dados = sock.recv(2)
+        tamanho = int.from_bytes(dados, 'big')
+        dados = sock.recv(tamanho)
+        return dados.decode()
 
     def get_clicked_square(self, x : int, y : int) -> tuple[int, int]:
         if self.pieceColor == PieceColor.WHITE:
@@ -53,11 +69,14 @@ class Player():
         self.renderer.render(self.board, self.pieceColor)
 
     def start_tick(self) -> None:
+        dadosCodificados = self.formatarEnvio(self.mensagem)
+        self.mec.send(dadosCodificados)
         self.mec.enviarMensagem(self.mensagem)
         self.mensagem = "e$"
 
     def tick(self) -> None:
-        dados = self.mec.receberMensagem().split("$")
+        mensagemRecebida = self.obterString(self.mec)
+        dados = mensagemRecebida.split('$')
         if dados[0] != "e":
             start = (int(dados[1]), int(dados[2]))
             end = (int(dados[3]), int(dados[4]))
