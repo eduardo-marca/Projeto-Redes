@@ -1,0 +1,17 @@
+Descrição dos Tipos e Fluxo de Mensagens
+
+A comunicação entre os jogadores é realizada por meio de sockets TCP, seguindo uma arquitetura cliente-servidor. Um dos computadores atua como servidor, aguardando conexões, enquanto o outro atua como cliente, estabelecendo uma conexão utilizando o endereço IP do servidor e a porta 50000.
+
+Após o estabelecimento da conexão, os computadores utilizam um protocolo de aplicação próprio para realizar a troca de informações referentes às jogadas. As mensagens são transmitidas em formato textual e delimitadas por uma quebra de linha.
+
+O protocolo define um tipo principal de mensagem:
+
+- Movimento ('m'): utilizada para transmitir uma jogada realizada por um jogador. Contém as coordenadas da posição inicial e final da peça, além de indicadores para identificar movimentos especiais, como roque e promoção de peão.
+
+A estrutura da mensagem é representada por:
+
+"m$linha_inicial$coluna_inicial$linha_final$coluna_final$roque$promocao\n"
+
+Quando um jogador realiza uma jogada válida, seu computador atualiza o tabuleiro local e transmite uma mensagem contendo as informações do movimento ao computador adversário. Ao receber a mensagem, o outro computador interpreta os campos e reproduz o movimento em seu próprio tabuleiro, mantendo ambos sincronizados.
+
+A comunicação é bidirecional, permitindo que tanto o servidor quanto o cliente transmitam e recebam mensagens através da mesma conexão TCP. Dessa forma, o processo se repete alternadamente durante a partida, conforme os jogadores realizam suas jogadas.
